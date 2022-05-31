@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component} from '@angular/core';
 import {DecibelMeterService} from "./decibel-meter.service";
-import {Subscription} from "rxjs";
+import { map, Subscription } from "rxjs";
 import {FormControl} from "@angular/forms";
 
 @Component({
@@ -40,7 +40,11 @@ export class AppComponent {
 
   onStartRecording() {
     this.maxRecordDecibelSaved = '';
-    this.recordDecibelSubscription = this.decibelMeterService.getDecibels(20, {sensibility: this.sensibiltyFC.value}).subscribe(
+    this.recordDecibelSubscription = this.decibelMeterService.getDecibels()
+      .pipe(
+        map((decibel: number) => decibel * (this.sensibiltyFC.value || 1))
+      )
+      .subscribe(
       (decibel: number) => {
         this.decibel = decibel;
         if (this.maxRecordDecibel < decibel) {

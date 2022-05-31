@@ -1,0 +1,51 @@
+:host {
+
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    &>* {
+      margin-bottom: 20px;
+    }
+    &:last-child {
+      margin-bottom: 0px;
+    }
+  }
+
+  .options {
+    background: lightgray;
+    padding: 10px;
+    border-radius: 20px;
+
+    h3 {
+      margin: 0;
+      text-align: center;
+    }
+    label {
+      margin-right: 10px;
+    }
+
+  }
+
+  .level {
+    width: 200px;
+    height: 50px;
+    border: 1px solid black;
+    opacity: 0.5;
+    &.red {
+      background: red;
+    }
+    &.yellow {
+      background: yellow;
+    }
+    &.green {
+      background: green;
+    }
+    &.active {
+      opacity: 0.8;
+    }
+  }
+}

@@ -12,17 +12,24 @@
   <button color="primary" mat-raised-button (click)="onEndRecording()" *ngIf="recording">Terminer l'enregistrement
   </button>
 
+  <div class="best-score">
+    <ng-container *ngIf="maxRecordDecibelSaved">Meilleur score : <strong>{{maxRecordDecibelSaved }}db</strong> </ng-container>
+    <ng-container *ngIf="!maxRecordDecibelSaved && !recording">
+      Aucun score enregistré. Cliquez sur <strong>Commencer l'enregistrement</strong> pour débuter la mesure du son.
+    </ng-container>
+    <ng-container *ngIf="!maxRecordDecibelSaved && recording">
+      Aucun score enregistré. Cliquez sur <strong>Terminer l'enregistrement</strong> pour afficher la veleure la plus forte enregistrée.
+    </ng-container>
+
+  </div>
+
   <div class="options">
     <h3>Options </h3>
     <div>
       <label>Sensibilité</label>
-      <mat-slider thumbLabel color="primary" min="1" max="10" step="0.5" [formControl]="sensibiltyFC"
+      <mat-slider thumbLabel color="primary" min="0" max="10" step="0.1" [formControl]="sensibiltyFC"
                   [disabled]="recording">
       </mat-slider>
     </div>
-  </div>
-
-  <div class="best-score" *ngIf="maxRecordDecibelSaved">
-    Meilleur score : {{maxRecordDecibelSaved }}db
   </div>
 </div>

@@ -12,54 +12,30 @@ export class AppComponent {
   title = 'decibel-meter';
   decibel: number = 0;
 
-  decibelsLevels: DecibelLevel[] = [
-    {
-      minDecibel: 60,
-      maxDecibel: 1000,
-      color: 'red'
-    },
-    {
-      minDecibel: 50,
-      maxDecibel: 60,
-      color: 'red'
-    },
-    {
-      minDecibel: 40,
-      maxDecibel: 50,
-      color: 'yellow'
-    },
-    {
-      minDecibel: 30,
-      maxDecibel: 40,
-      color: 'yellow'
-    },
-    {
-      minDecibel: 20,
-      maxDecibel: 30,
-      color: 'yellow'
-    },
-    {
-      minDecibel: 10,
-      maxDecibel: 20,
-      color: 'green'
-    },
-    {
-      minDecibel: 2,
-      maxDecibel: 10,
-      color: 'green'
-    },
-  ]
+  decibelsLevels: DecibelLevel[] = []
+  NB_DECIBEL_LEVELS: number = 20;
+  NB_MAX_DECIBELS: number = 120;
   recording: boolean = false;
 
   private maxRecordDecibel: number = 0;
   maxRecordDecibelSaved: string = '';
   private recordDecibelSubscription?: Subscription;
-  sensibiltyFC: FormControl = new FormControl();
+  sensibiltyFC: FormControl = new FormControl(1);
 
   constructor(
     private decibelMeterService: DecibelMeterService,
     private changeDectectorRef: ChangeDetectorRef,
   ) {
+    for(let i = 0; i < this.NB_DECIBEL_LEVELS; i++) {
+      this.decibelsLevels.push(
+        {
+          color: i < (this.NB_DECIBEL_LEVELS/3) ? 'green' : (i < (this.NB_DECIBEL_LEVELS/3*2) ? 'yellow' : 'red'),
+          minDecibel: i * (this.NB_MAX_DECIBELS / this.NB_DECIBEL_LEVELS),
+          maxDecibel: (i === this.NB_MAX_DECIBELS) ? Infinity : ((i+1) * (this.NB_MAX_DECIBELS / this.NB_DECIBEL_LEVELS)),
+        }
+      );
+    }
+    this.decibelsLevels = this.decibelsLevels.slice().reverse();
   }
 
   onStartRecording() {

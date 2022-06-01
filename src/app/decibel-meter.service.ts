@@ -1,15 +1,21 @@
 import { Injectable } from '@angular/core';
-import { filter, map, Observable } from "rxjs";
+import { filter, from, map, Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DecibelMeterService {
 
+  private scriptProcessor?: ScriptProcessorNode;
+  private mediaStream?: MediaStream;
+
   constructor() {
   }
 
   getDecibels(interval?: number): Observable<number> {
+    if (this.scriptProcessor) {
+      this.endRecord();
+    }
     let decibelStored: number[] = []
     return this.startRecord()
       .pipe(
@@ -34,23 +40,24 @@ export class DecibelMeterService {
   private startRecord(): Observable<number> {
     return new Observable<number>(
       subscriber => {
-        navigator.mediaDevices.getUserMedia({
+        from(navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
-        })
-          .then(function (stream) {
+        })).subscribe({
+          next: (stream: MediaStream) => {
+            this.mediaStream = stream;
             const audioContext = new AudioContext();
             const analyser = audioContext.createAnalyser();
-            const microphone = audioContext.createMediaStreamSource(stream);
-            const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+            const microphone = audioContext.createMediaStreamSource(this.mediaStream);
+            this.scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
 
             analyser.smoothingTimeConstant = 0.8;
             analyser.fftSize = 1024;
 
             microphone.connect(analyser);
-            analyser.connect(scriptProcessor);
-            scriptProcessor.connect(audioContext.destination);
-            scriptProcessor.onaudioprocess = function () {
+            analyser.connect(this.scriptProcessor);
+            this.scriptProcessor.connect(audioContext.destination);
+            this.scriptProcessor.onaudioprocess = function () {
               const array = new Uint8Array(analyser.frequencyBinCount);
               analyser.getByteFrequencyData(array);
               const arraySum = array.reduce((a, value) => a + value, 0);
@@ -58,16 +65,19 @@ export class DecibelMeterService {
               subscriber.next(average);
               // colorPids(average);
             };
-          })
-          .catch(function (err) {
-            /* handle the error */
-            console.error(err);
-          });
-      }
-    );
+          },
+          error: () => {
+            const errorMessage = `Impossible d'accéder au microphone.`;
+            console.log(errorMessage);
+            subscriber.error(errorMessage);
+          }
+        });
+      });
   }
-}
 
-export interface DecibelMeterOptions {
-  sensibility?: number
+  endRecord(): void {
+    this.scriptProcessor?.disconnect();
+    this.mediaStream?.getTracks().forEach(function(track: MediaStreamTrack) { track.stop(); })
+    this.scriptProcessor = undefined;
+  }
 }

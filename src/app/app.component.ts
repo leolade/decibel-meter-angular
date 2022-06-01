@@ -1,7 +1,8 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
-import {DecibelMeterService} from "./decibel-meter.service";
-import { map, Subscription } from "rxjs";
-import {FormControl} from "@angular/forms";
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { FormControl } from "@angular/forms";
+import { MatExpansionPanel } from '@angular/material/expansion';
+import { interval, map, Subscription, takeWhile } from "rxjs";
+import { DecibelMeterService } from "./decibel-meter.service";
 
 @Component({
   selector: 'app-root',
@@ -9,18 +10,33 @@ import {FormControl} from "@angular/forms";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+
+  @ViewChild('optionsPanel', {read: MatExpansionPanel})
+  optionsPanel?: MatExpansionPanel;
+  optionsOpenBeforeRecord: boolean = true;
+
   title = 'decibel-meter';
-  decibel: number = 0;
+  decibelMeasure: number = 0;
 
   decibelsLevels: DecibelLevel[] = []
   NB_DECIBEL_LEVELS: number = 20;
   NB_MAX_DECIBELS: number = 120;
   recording: boolean = false;
+  alreadySavedMeasure: boolean = false;
+  maxMeasureSaved: string = '';
+  averageMeasureSaved: string = '';
 
-  private maxRecordDecibel: number = 0;
-  maxRecordDecibelSaved: string = '';
-  private recordDecibelSubscription?: Subscription;
+  remainingSeconds: number | undefined;
+
   sensibiltyFC: FormControl = new FormControl(1);
+  finAutoFC: FormControl = new FormControl(true);
+  finAutoSecondesFC: FormControl = new FormControl(10);
+
+  private currentRecordMeasures: number[] = [];
+  private currentRecordMaxMeasure: number = 0;
+
+  private recordSubscription?: Subscription;
+  private timeoutId?: number = undefined;
 
   constructor(
     private decibelMeterService: DecibelMeterService,
@@ -39,16 +55,38 @@ export class AppComponent {
   }
 
   onStartRecording() {
-    this.maxRecordDecibelSaved = '';
-    this.recordDecibelSubscription = this.decibelMeterService.getDecibels()
+    this.optionsOpenBeforeRecord = !!this.optionsPanel?.expanded;
+    this.optionsPanel?.close();
+
+    if (this.finAutoFC.value && this.finAutoSecondesFC.value) {
+      this.remainingSeconds = this.finAutoSecondesFC.value;
+      this.timeoutId = setTimeout(() => {
+        if (this.recording) {
+          this.endRecord();
+        }
+      },  this.finAutoSecondesFC.value * 1000);
+      interval(1000)
+        .pipe(takeWhile(() => this.timeoutId !== undefined && this.remainingSeconds !== undefined && this.remainingSeconds >= 0))
+        .subscribe(
+          () => {
+            if (!!this.remainingSeconds) {
+              this.remainingSeconds -= 1;
+            }
+          }
+        )
+    }
+
+    this.maxMeasureSaved = '';
+    this.recordSubscription = this.decibelMeterService.getDecibels()
       .pipe(
         map((decibel: number) => decibel * (this.sensibiltyFC.value || 1))
       )
       .subscribe(
       (decibel: number) => {
-        this.decibel = decibel;
-        if (this.maxRecordDecibel < decibel) {
-          this.maxRecordDecibel = decibel;
+        this.decibelMeasure = decibel;
+        this.currentRecordMeasures.push(decibel);
+        if (this.currentRecordMaxMeasure < decibel) {
+          this.currentRecordMaxMeasure = decibel;
         }
         this.changeDectectorRef.detectChanges();
       }
@@ -57,11 +95,33 @@ export class AppComponent {
   }
 
   onEndRecording() {
-    this.recordDecibelSubscription?.unsubscribe()
+    this.endRecord();
+  }
+
+  private endRecord(): void {
+    this.maxMeasureSaved = this.currentRecordMaxMeasure.toFixed(2);
+    this.averageMeasureSaved = (this.currentRecordMeasures.reduce((a, b) => a + b, 0) / this.currentRecordMeasures.length).toFixed(2);
+
+    if (!this.alreadySavedMeasure) {
+        this.alreadySavedMeasure = true;
+    }
+
+    // Reset values used for each record
+    this.decibelMeterService.endRecord();
+    this.recordSubscription?.unsubscribe()
     this.recording = false;
-    this.maxRecordDecibelSaved = this.maxRecordDecibel.toFixed(2);
-    this.maxRecordDecibel = 0;
-    this.decibel = 0;
+    this.currentRecordMeasures = [];
+    this.currentRecordMaxMeasure = 0;
+    this.decibelMeasure = 0;
+    if(this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = undefined;
+    }
+    this.remainingSeconds = undefined;
+
+    if (this.optionsOpenBeforeRecord) {
+      this.optionsPanel?.open();
+    }
   }
 }
 

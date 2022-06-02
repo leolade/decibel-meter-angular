@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
-import { FormControl } from "@angular/forms";
-import { MatExpansionPanel } from '@angular/material/expansion';
-import { interval, map, Subscription, takeWhile } from "rxjs";
-import { DecibelMeterService } from "./decibel-meter.service";
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {FormControl} from "@angular/forms";
+import {MatExpansionPanel} from '@angular/material/expansion';
+import {filter, interval, map, takeWhile, tap} from "rxjs";
+import {DecibelMeterService} from "./decibel-meter.service";
 
 @Component({
   selector: 'app-root',
@@ -29,42 +29,76 @@ export class AppComponent {
   remainingSeconds: number | undefined;
 
   sensibiltyFC: FormControl = new FormControl(1);
-  finAutoFC: FormControl = new FormControl(true);
-  finAutoSecondesFC: FormControl = new FormControl(10);
+  autoEndFC: FormControl = new FormControl(true);
+  autoEndCountdownFC: FormControl = new FormControl(10);
 
   private currentRecordMeasures: number[] = [];
   private currentRecordMaxMeasure: number = 0;
-
-  private recordSubscription?: Subscription;
   private timeoutId?: number = undefined;
 
   constructor(
     private decibelMeterService: DecibelMeterService,
     private changeDectectorRef: ChangeDetectorRef,
   ) {
-    for(let i = 0; i < this.NB_DECIBEL_LEVELS; i++) {
+
+    // Fill the levels using constants.
+    for (let i = 0; i < this.NB_DECIBEL_LEVELS; i++) {
       this.decibelsLevels.push(
         {
-          color: i < (this.NB_DECIBEL_LEVELS/3) ? 'green' : (i < (this.NB_DECIBEL_LEVELS/3*2) ? 'yellow' : 'red'),
+          color: i < (this.NB_DECIBEL_LEVELS / 3) ? 'green' : (i < (this.NB_DECIBEL_LEVELS / 3 * 2) ? 'yellow' : 'red'),
           minDecibel: i * (this.NB_MAX_DECIBELS / this.NB_DECIBEL_LEVELS),
-          maxDecibel: (i === this.NB_MAX_DECIBELS) ? Infinity : ((i+1) * (this.NB_MAX_DECIBELS / this.NB_DECIBEL_LEVELS)),
+          maxDecibel: (i === this.NB_MAX_DECIBELS) ? Infinity : ((i + 1) * (this.NB_MAX_DECIBELS / this.NB_DECIBEL_LEVELS)),
         }
       );
     }
+    // Reverse list to have lowest values at the bottom of chart
     this.decibelsLevels = this.decibelsLevels.slice().reverse();
+
+
+    // Record decibels everytime, to show user mic is working, but we save values only while whe are recording.
+    this.decibelMeterService.getDecibels()
+      .pipe(
+        map((decibel: number) => decibel * (this.sensibiltyFC.value || 1)),
+        tap((decibel: number) => {
+          this.decibelMeasure = decibel;
+          this.changeDectectorRef.detectChanges();
+        }),
+        filter(() => this.recording)
+      )
+      .subscribe(
+        (decibel: number) => {
+          // Push all values in temporary array to make average after.
+          this.currentRecordMeasures.push(decibel);
+          // If the value is higher than the previous higher, replace it.
+          if (this.currentRecordMaxMeasure < decibel) {
+            this.currentRecordMaxMeasure = decibel;
+          }
+        }
+      );
   }
 
+  /**
+   * Handle actions at user "Start record" interaction
+   */
   onStartRecording() {
+    // Save the state (open or not) of the options panel, to restore at the end of record
     this.optionsOpenBeforeRecord = !!this.optionsPanel?.expanded;
+    // Close options to get max height of the chart
     this.optionsPanel?.close();
 
-    if (this.finAutoFC.value && this.finAutoSecondesFC.value) {
-      this.remainingSeconds = this.finAutoSecondesFC.value;
+    // If we use automatic ending, handle the countdown
+    if (this.useAutoEnding()) {
+      this.remainingSeconds = this.autoEndCountdownFC.value;
+
+      // End record at the end of the countdown
       this.timeoutId = setTimeout(() => {
+        // Only if still recording (user can stop record with button before countdown finish)
         if (this.recording) {
           this.endRecord();
         }
-      },  this.finAutoSecondesFC.value * 1000);
+      }, this.autoEndCountdownFC.value * 1000);
+
+      // Remove 1 second every second.
       interval(1000)
         .pipe(takeWhile(() => this.timeoutId !== undefined && this.remainingSeconds !== undefined && this.remainingSeconds >= 0))
         .subscribe(
@@ -76,52 +110,64 @@ export class AppComponent {
         )
     }
 
+    // Reset max measure and average measure
     this.maxMeasureSaved = '';
-    this.recordSubscription = this.decibelMeterService.getDecibels()
-      .pipe(
-        map((decibel: number) => decibel * (this.sensibiltyFC.value || 1))
-      )
-      .subscribe(
-      (decibel: number) => {
-        this.decibelMeasure = decibel;
-        this.currentRecordMeasures.push(decibel);
-        if (this.currentRecordMaxMeasure < decibel) {
-          this.currentRecordMaxMeasure = decibel;
-        }
-        this.changeDectectorRef.detectChanges();
-      }
-    );
+    this.averageMeasureSaved = '';
+
+    // Set recording state
     this.recording = true;
   }
 
+  /**
+   * Handle actions at user "End Record" interaction
+   */
   onEndRecording() {
     this.endRecord();
   }
 
+  /**
+   * End Record of measure to be saved.
+   * Microphone is still open after this method because we want decibel on chart even if not recording them.
+   * @private
+   */
   private endRecord(): void {
+
+    /*
+    Save best and average measure
+    todo: refactor using "number" pipe in template (currently not working due IntelliJ don't support Angular 13)
+     */
     this.maxMeasureSaved = this.currentRecordMaxMeasure.toFixed(2);
     this.averageMeasureSaved = (this.currentRecordMeasures.reduce((a, b) => a + b, 0) / this.currentRecordMeasures.length).toFixed(2);
 
+    // The first time we navigate here, we set indicator at 'true'
     if (!this.alreadySavedMeasure) {
-        this.alreadySavedMeasure = true;
+      this.alreadySavedMeasure = true;
     }
 
     // Reset values used for each record
-    this.decibelMeterService.endRecord();
-    this.recordSubscription?.unsubscribe()
     this.recording = false;
     this.currentRecordMeasures = [];
     this.currentRecordMaxMeasure = 0;
     this.decibelMeasure = 0;
-    if(this.timeoutId) {
+    if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = undefined;
     }
     this.remainingSeconds = undefined;
 
+    // Open options if there was opened before record
     if (this.optionsOpenBeforeRecord) {
       this.optionsPanel?.open();
     }
+  }
+
+  /**
+   * Is the user parameter auto ending
+   * @return true if the user check auto end and set truthy value of seconds, false otherwise
+   * @private
+   */
+  private useAutoEnding(): boolean {
+    return this.autoEndFC.value && this.autoEndCountdownFC.value;
   }
 }
 

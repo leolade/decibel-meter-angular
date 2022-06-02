@@ -8,16 +8,15 @@ export class DecibelMeterService {
 
   private scriptProcessor?: ScriptProcessorNode;
   private mediaStream?: MediaStream;
+  private decibelObserver: Observable<number>;
 
   constructor() {
+    this.decibelObserver = this.startRecord();
   }
 
   getDecibels(interval?: number): Observable<number> {
-    if (this.scriptProcessor) {
-      this.endRecord();
-    }
     let decibelStored: number[] = []
-    return this.startRecord()
+    return from(this.decibelObserver)
       .pipe(
         filter((value: number) => {
           if (!interval || interval === 1) {

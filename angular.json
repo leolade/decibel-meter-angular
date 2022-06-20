@@ -31,6 +31,7 @@
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "./node_modules/flexbox-sass/src/flexbox.scss",
               "src/styles.css"
             ],
             "scripts": []
@@ -99,6 +100,7 @@
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "./node_modules/flexbox-sass/src/flexbox.scss",
               "src/styles.css"
             ],
             "scripts": []

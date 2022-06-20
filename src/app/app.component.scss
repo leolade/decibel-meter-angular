@@ -33,9 +33,15 @@
       z-index: 1;
       width: calc(100% - 30px);
 
+      h1, h2 {
+        text-align: center;
+      }
       h1 {
         font-weight: 500;
         margin: 0;
+      }
+      h2 {
+        font-weight: 300;
       }
     }
 

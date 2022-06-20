@@ -31,6 +31,14 @@ export class AppComponent {
   sensibiltyFC: FormControl = new FormControl(1);
   autoEndFC: FormControl = new FormControl(true);
   autoEndCountdownFC: FormControl = new FormControl(10);
+  showRankFC: FormControl = new FormControl(true);
+  debugFC: FormControl = new FormControl(false);
+  teamNameFC: FormControl = new FormControl("");
+  teamNameDebugFC: FormControl = new FormControl("");
+  teamScoreDebugFC: FormControl = new FormControl("");
+
+  ranking: [string, string][] = [[`Vidéo 1`, '20.99']];
+  sortedRanking: [string, string][] = [[`Vidéo 1`, '20.99']];
 
   private currentRecordMeasures: number[] = [];
   private currentRecordMaxMeasure: number = 0;
@@ -139,6 +147,8 @@ export class AppComponent {
     this.maxMeasureSaved = this.currentRecordMaxMeasure.toFixed(2);
     this.averageMeasureSaved = (this.currentRecordMeasures.reduce((a, b) => a + b, 0) / this.currentRecordMeasures.length).toFixed(2);
 
+    this.saveRank(this.maxMeasureSaved, this.averageMeasureSaved);
+
     // The first time we navigate here, we set indicator at 'true'
     if (!this.alreadySavedMeasure) {
       this.alreadySavedMeasure = true;
@@ -168,6 +178,41 @@ export class AppComponent {
    */
   private useAutoEnding(): boolean {
     return this.autoEndFC.value && this.autoEndCountdownFC.value;
+  }
+
+  saveRank(maxMeasureSaved: string, averageMeasureSaved: string) {
+    if (this.teamNameFC.value?.trim()) {
+      const teamName: string = this.teamNameFC.value.trim();
+      this.ranking.push([teamName, `${averageMeasureSaved}`]);
+      this.sortedRanking = this.sortRank(this.ranking);
+      this.teamNameFC.reset();
+    }
+  }
+
+  deleteRank(index: number): void {
+    this.ranking.splice(index, 1);
+    this.sortedRanking = this.sortRank(this.ranking);
+  }
+
+  sortRank(ranking: [string, string][]): [string, string][] {
+    return [...ranking].sort(
+      ([rank1TeamName, rank1Scores]: [string, string], [rank2TeamName, rank2Scores]: [string, string]) => {
+        const rank1Average = parseFloat(rank1Scores);
+        const rank2Average = parseFloat(rank2Scores);
+        return rank1Average < rank2Average ? 1 : (rank1Average > rank2Average ? -1 : 0) ;
+      }
+    )
+  }
+
+  saveRankDebug(): void {
+    if (this.teamNameDebugFC.value?.trim() && !isNaN(parseFloat(this.teamScoreDebugFC.value))) {
+      const teamName: string = this.teamNameDebugFC.value.trim();
+      this.ranking.push([teamName, `${this.teamScoreDebugFC.value}`]);
+      this.sortedRanking = this.sortRank(this.ranking);
+      this.teamNameDebugFC.reset();
+      this.teamScoreDebugFC.reset();
+      this.debugFC.reset();
+    }
   }
 }
 

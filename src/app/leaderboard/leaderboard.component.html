@@ -1,0 +1,12 @@
+<h2>Classement</h2>
+<mat-list>
+  <mat-list-item *ngFor="let rank of sortedRanking; let i = index">
+    <span class="rank-text">{{rank[0]}} : {{rank[1]}}db</span>
+    <button (click)="onDeleteRank(i)" color="primary" mat-mini-fab>
+      <mat-icon>clear</mat-icon>
+    </button>
+  </mat-list-item>
+  <ng-container *ngIf="sortedRanking.length <= 0">
+    <p>Le classement est vide</p>
+  </ng-container>
+</mat-list>

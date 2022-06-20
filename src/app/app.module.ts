@@ -4,19 +4,30 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSliderModule } from "@angular/material/slider";
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { NgxDropzoneModule } from 'ngx-dropzone';
 
 import { AppComponent } from './app.component';
 import {MatListModule} from "@angular/material/list";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatIconModule} from "@angular/material/icon";
 import {MatInputModule} from "@angular/material/input";
+import { OptionsComponent } from './options/options.component';
+import { ApplauseMeterComponent } from './applause-meter/applause-meter.component';
+import { LeaderboardComponent } from './leaderboard/leaderboard.component';
+import { CountdownComponent } from './countdown/countdown.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    OptionsComponent,
+    ApplauseMeterComponent,
+    LeaderboardComponent,
+    CountdownComponent
   ],
   imports: [
     BrowserModule,
@@ -30,7 +41,10 @@ import {MatInputModule} from "@angular/material/input";
     MatListModule,
     MatSlideToggleModule,
     MatIconModule,
-    MatInputModule
+    MatInputModule,
+    NgxDropzoneModule,
+    MatSidenavModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

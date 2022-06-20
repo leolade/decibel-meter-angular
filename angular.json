@@ -10,7 +10,14 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
-          "strict": true
+          "strict": true,
+          "style": "scss"
+        },
+        "@schematics/angular:component": {
+          "style": "scss",
+          "skipTests": true,
+          "displayBlock": true,
+          "changeDetection": "OnPush"
         }
       },
       "root": "",

@@ -1,0 +1,7 @@
+<div class="applause-meter">
+  <div class="levels">
+    <div *ngFor="let level of decibelsLevels" [ngClass]="[level.color, decibelMeasure > level.minDecibel ? 'active' : '']"
+         class="level">
+    </div>
+  </div>
+</div>

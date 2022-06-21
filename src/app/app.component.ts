@@ -32,8 +32,8 @@ export class AppComponent {
   remainingSeconds: number | undefined;
   teamNameFC: FormControl = new FormControl("");
 
-  ranking: [string, string][] = [];
-  sortedRanking: [string, string][] = [];
+  ranking: [string, string][] = this.loadRankLocalStorage();
+  sortedRanking: [string, string][] = this.sortRank(this.ranking);
   file?: File;
   drawerState?: 'OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER';
   drawerPosition: 'start' | 'end' = 'start';
@@ -129,11 +129,13 @@ export class AppComponent {
       this.sortedRanking = this.sortRank(this.ranking);
       this.teamNameFC.reset();
     }
+    this.saveRankLocalStorage();
   }
 
   deleteRank(index: number): void {
     this.ranking.splice(index, 1);
     this.sortedRanking = this.sortRank(this.ranking);
+    this.saveRankLocalStorage();
   }
 
   sortRank(ranking: [string, string][]): [string, string][] {
@@ -152,6 +154,7 @@ export class AppComponent {
       this.ranking.push([teamName, `${debugScore}`]);
       this.sortedRanking = this.sortRank(this.ranking);
     }
+    this.saveRankLocalStorage();
   }
 
   setFile(dropzoneChangeEvent: NgxDropzoneChangeEvent): void {
@@ -238,6 +241,7 @@ export class AppComponent {
             this.drawer?.close().then(
               () => {
                 subscriber.next(true);
+                subscriber.next(true);
               }
             );
         } else if (!this.drawer?.opened) {
@@ -277,6 +281,24 @@ export class AppComponent {
 
   onImageRemovedClick(): void {
     this.file = undefined;
+  }
+
+  private saveRankLocalStorage(): void {
+    localStorage.setItem('DECIBEL_METER_RANK', JSON.stringify(this.ranking));
+  }
+
+  private loadRankLocalStorage(): [string, string][] {
+    const jsonDecibelRank: string | null = localStorage.getItem('DECIBEL_METER_RANK');
+    if (!jsonDecibelRank) {
+      return [];
+    }
+    return JSON.parse(jsonDecibelRank);
+  }
+
+  onClearRankClick() {
+    this.ranking = [];
+    this.sortedRanking = this.sortRank(this.ranking);
+    this.saveRankLocalStorage();
   }
 }
 

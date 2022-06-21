@@ -6,6 +6,7 @@
                    [defaultOptions]="options"
                    [hasFile]="!!file"
                    (imageRemovedClick)="onImageRemovedClick()"
+                   (clearRankClick)="onClearRankClick()"
                    (debugScoreTyped)="saveRankDebug($event)" (optionsChanged)="onOptionChanged($event)">
       </app-options>
       <app-applause-meter *ngSwitchCase="'APPLAUSE_METER'" [recording]="recording" [decibelMeasure]="decibelMeasure" [options]="options" [remainingSeconds]="remainingSeconds">

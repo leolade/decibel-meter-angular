@@ -16,11 +16,14 @@
 <div class="option">
   <mat-slide-toggle [formControl]="showRankFC">Afficher le classement</mat-slide-toggle>
 </div>
+<div class="option" *ngIf="hasFile">
+  <button mat-stroked-button color="warn" (click)="onRemoveImageClickHandler()">Retirer l'image</button>
+</div>
+<div class="option">
+  <button mat-stroked-button color="warn" (click)="onClearRankClickHandler()">Vider le classement</button>
+</div>
 <div class="option">
   <mat-slide-toggle [formControl]="debugFC">Mode debug</mat-slide-toggle>
-</div>
-<div class="option" *ngIf="hasFile">
-  <button mat-button color="warn" (click)="onRemoveImageClickHandler()">Retirer l'image</button>
 </div>
 <ng-container *ngIf="debugFC.value">
   <div class="option fxFlexbox fxLayoutColumn fxLayoutGap10 fxLayoutAlignCenterStart">

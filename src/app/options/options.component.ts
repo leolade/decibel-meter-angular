@@ -25,6 +25,7 @@ export class OptionsComponent implements OnInit {
   @Output() optionsChanged: EventEmitter<IDecibelMeterOptions> = new EventEmitter<IDecibelMeterOptions>();
   @Output() debugScoreTyped: EventEmitter<[string, string]> = new EventEmitter<[string, string]>();
   @Output() imageRemovedClick: EventEmitter<void> = new EventEmitter<void>();
+  @Output() clearRankClick: EventEmitter<void> = new EventEmitter<void>();
 
   constructor() {
     this.optionsForm = new FormGroup(
@@ -65,6 +66,10 @@ export class OptionsComponent implements OnInit {
 
   onRemoveImageClickHandler(): void {
     this.imageRemovedClick.emit();
+  }
+
+  onClearRankClickHandler(): void {
+    this.clearRankClick.emit();
   }
 }
 

@@ -1,0 +1,30 @@
+:host {
+  padding: 20px;
+  display: block;
+
+  .slider-container {
+    &.disabled {
+      label {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .option {
+    border-bottom: 1px solid lightgrey;
+    margin-bottom: 15px;
+
+    mat-slide-toggle {
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin-bottom: 10px;
+    }
+  }
+
+  .option:last-of-type {
+    border-bottom: none;
+    margin-bottom: inherit;
+  }
+}

@@ -1,0 +1,42 @@
+<h2>Options</h2>
+<div class="slider-container option">
+  <label>Sensibilité</label>
+  <mat-slider [formControl]="sensibiltyFC" color="primary" max="10" min="0.1" step="0.1"
+              thumbLabel></mat-slider>
+</div>
+<div class="option">
+  <mat-checkbox [disabled]="recording" [formControl]="autoEndFC">Fin automatique</mat-checkbox>
+  <div [ngClass]="{'disabled': !autoEndFC.value}" class="slider-container">
+    <label>Au bout de {{autoEndCountdownFC.value}} secondes</label>
+    <mat-slider [disabled]="!autoEndFC.value || recording" [formControl]="autoEndCountdownFC" color="primary" max="30"
+                min="1"
+                step="1" thumbLabel></mat-slider>
+  </div>
+</div>
+<div class="option">
+  <mat-slide-toggle [formControl]="showRankFC">Afficher le classement</mat-slide-toggle>
+</div>
+<div class="option" *ngIf="hasFile">
+  <button mat-stroked-button color="warn" (click)="onRemoveImageClickHandler()">Retirer l'image</button>
+</div>
+<div class="option">
+  <button mat-stroked-button color="warn" (click)="onClearRankClickHandler()">Vider le classement</button>
+</div>
+<div class="option">
+  <mat-slide-toggle [formControl]="debugFC">Mode debug</mat-slide-toggle>
+</div>
+<ng-container *ngIf="debugFC.value">
+  <div class="option fxFlexbox fxLayoutColumn fxLayoutGap10 fxLayoutAlignCenterStart">
+    <mat-form-field>
+      <mat-label>Nom de l'équipe</mat-label>
+      <input [formControl]="teamNameDebugFC" matInput type="text"/>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Score de l'équipe</mat-label>
+      <input [formControl]="teamScoreDebugFC" matInput type="text"/>
+    </mat-form-field>
+    <div>
+      <button (click)="saveRankDebug()" mat-stroked-button>Ajouter le score</button>
+    </div>
+  </div>
+</ng-container>

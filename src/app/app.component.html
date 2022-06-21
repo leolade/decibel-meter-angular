@@ -1,94 +1,85 @@
-<div class="main-container">
-  <h1>Applaudimètre</h1>
-
-  <div class="applause-meter">
-    <div class="levels" [ngClass]="{'mini': showRankFC.value && !recording && sortedRanking.length}">
-      <div *ngFor="let level of decibelsLevels" class="level"
-           [ngClass]="[level.color, decibelMeasure > level.minDecibel ? 'active' : '']">
-      </div>
-      <div class="countdown" *ngIf="recording && remainingSeconds">{{remainingSeconds}}</div>
-    </div>
-    <div class="ranking" *ngIf="showRankFC.value && !recording && sortedRanking.length">
-      <h2>Classement</h2>
-      <mat-list>
-        <mat-list-item *ngFor="let rank of sortedRanking; let i = index">
-          <span class="rank-text">{{rank[0]}} : {{rank[1]}}db</span>
-          <button mat-mini-fab color="primary" (click)="deleteRank(i)">
-            <mat-icon>clear</mat-icon>
-          </button>
-        </mat-list-item>
-      </mat-list>
-    </div>
-  </div>
-
-
-  <button color="primary" mat-raised-button (click)="onStartRecording()" *ngIf="!recording">Commencer l'enregistrement
-  </button>
-  <button color="primary" mat-raised-button (click)="onEndRecording()" *ngIf="recording">Terminer l'enregistrement
-  </button>
-
-  <div class="best-score">
-    <ng-container *ngIf="averageMeasureSaved">
-      <div>Meilleur score : <strong>{{maxMeasureSaved }}db</strong></div>
-      <div>Score moyen : <strong>{{ averageMeasureSaved }}db</strong></div>
-      <div class="team-name-form-field fxFlexbox fxLayoutRow fxLayoutGap10 fxLayoutAlignCenterCenter">
-        <mat-form-field>
-          <mat-label>Nom de l'équipe</mat-label>
-          <input matInput type="text" [formControl]="teamNameFC"/>
-        </mat-form-field>
-
+<mat-drawer-container [hasBackdrop]="false">
+  <mat-drawer #drawer [mode]="'side'" [position]="drawerPosition">
+    <ng-container [ngSwitch]="drawerState">
+      <app-options *ngSwitchCase="'OPTIONS'"
+                   [recording]="recording"
+                   [defaultOptions]="options"
+                   [hasFile]="!!file"
+                   (imageRemovedClick)="onImageRemovedClick()"
+                   (clearRankClick)="onClearRankClick()"
+                   (debugScoreTyped)="saveRankDebug($event)" (optionsChanged)="onOptionChanged($event)">
+      </app-options>
+      <app-applause-meter *ngSwitchCase="'APPLAUSE_METER'" [recording]="recording" [decibelMeasure]="decibelMeasure" [options]="options" [remainingSeconds]="remainingSeconds">
+      </app-applause-meter>
+      <app-leaderboard *ngSwitchCase="'LEADERBOARD'" [options]="options" [sortedRanking]="sortedRanking" (deleteRank)="deleteRank($event)">
+      </app-leaderboard>
+    </ng-container>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div (change)="setFile($event)" [disableClick]="true"
+         [ngClass]="{'has-image': !!file}"
+         accept="image/jpeg,image/jpg,image/png" class="app-container fxFlexbox fxLayoutColumn fxLayoutAlignCenterCenter" ngx-dropzone>
+      <ngx-dropzone-image-preview *ngIf="file" [file]="file">
+      </ngx-dropzone-image-preview>
+      <div class="app-header fxFlexbox fxLayoutRow fxLayoutAlignSpaceBetweenCenter">
         <div>
-          <button mat-stroked-button (click)="saveRank(maxMeasureSaved, averageMeasureSaved)">Valider</button>
+          <button mat-icon-button (click)="openSettings()">
+            <mat-icon>settings</mat-icon>
+          </button>
+        </div>
+        <div class="title-box fxFlexbox fxLayoutColumn">
+          <h1>Applaudimètre</h1>
+          <h2>Afterwork Sopra Steria 23 Juin 2022</h2>
+        </div>
+        <div class="fxFlexbox fxLayoutRow fxLayoutGap10">
+          <button mat-icon-button (click)="openApplauseMeter()">
+            <mat-icon>mic_external_on</mat-icon>
+          </button>
+          <button mat-icon-button (click)="openLeaderboard()">
+            <mat-icon>leaderboard</mat-icon>
+          </button>
         </div>
       </div>
-    </ng-container>
-    <ng-container *ngIf="!averageMeasureSaved">
-      <ng-container *ngIf="!alreadySavedMeasure && (!recording || (recording && !remainingSeconds))">Aucun score enregistré. Cliquez sur </ng-container>
-      <ng-container *ngIf="!recording"><strong>Commencer l'enregistrement</strong> pour débuter la mesure du son.</ng-container>
-      <ng-container *ngIf="recording && !remainingSeconds"><strong>Terminer l'enregistrement</strong> pour afficher les valeurs enregistrées.</ng-container>
-    </ng-container>
-  </div>
 
-  <mat-accordion class="options">
-    <mat-expansion-panel [expanded]="true" #optionsPanel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Options
-        </mat-panel-title>
-      </mat-expansion-panel-header>
+      <div class="main-container fxFlexbox fxLayoutRow fxLayoutAlignCenterEnd">
+          <div class="applause-container">
+            <app-countdown [maxCountdownValue]="options?.autoEndCountdown" [currentCountdownValue]="remainingSeconds"></app-countdown>
+            <button (click)="onStartRecording()" *ngIf="!recording" color="primary" mat-raised-button>Commencer
+            l'enregistrement
+          </button>
+          <button (click)="onEndRecording()" *ngIf="recording" color="primary" mat-raised-button>Terminer
+            l'enregistrement
+          </button>
 
-      <div class="slider-container option">
-        <label>Sensibilité</label>
-        <mat-slider thumbLabel color="primary" min="0.1" max="10" step="0.1" [formControl]="sensibiltyFC"></mat-slider>
-      </div>
-      <div class="option">
-        <mat-checkbox [disabled]="recording" [formControl]="autoEndFC">Fin automatique</mat-checkbox>
-        <div class="slider-container" [ngClass]="{'disabled': !autoEndFC.value}">
-          <label>Au bout de {{autoEndCountdownFC.value}} secondes</label>
-          <mat-slider [disabled]="!autoEndFC.value || recording" thumbLabel color="primary" min="1" max="30" step="1" [formControl]="autoEndCountdownFC"></mat-slider>
-        </div>
-      </div>
-      <div class="option">
-        <mat-slide-toggle [formControl]="showRankFC" >Afficher le classement</mat-slide-toggle>
-      </div>
-      <div class="option">
-        <mat-slide-toggle [formControl]="debugFC" >Mode debug</mat-slide-toggle>
-      </div>
-      <ng-container *ngIf="debugFC.value">
-          <div class="option fxFlexbox fxLayoutRow fxLayoutGap10 fxLayoutAlignCenterCenter">
-            <mat-form-field>
-              <mat-label>Nom de l'équipe</mat-label>
-              <input matInput type="text" [formControl]="teamNameDebugFC"/>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Score de l'équipe</mat-label>
-              <input matInput type="text" [formControl]="teamScoreDebugFC"/>
-            </mat-form-field>
-            <div>
-              <button mat-stroked-button (click)="saveRankDebug()">Valider</button>
-            </div>
+          <div class="best-score">
+            <ng-container *ngIf="averageMeasureSaved">
+              <div>Meilleur score : <strong>{{maxMeasureSaved }}db</strong></div>
+              <div>Score moyen : <strong>{{ averageMeasureSaved }}db</strong></div>
+              <div class="team-name-form-field fxFlexbox fxLayoutRow fxLayoutGap10 fxLayoutAlignCenterCenter">
+                <mat-form-field>
+                  <mat-label>Nom de l'équipe</mat-label>
+                  <input [formControl]="teamNameFC" matInput type="text"/>
+                </mat-form-field>
+
+                <div>
+                  <button (click)="saveRank(maxMeasureSaved, averageMeasureSaved)" mat-stroked-button >Valider</button>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!averageMeasureSaved">
+              <ng-container *ngIf="!alreadySavedMeasure && (!recording || (recording && !remainingSeconds))">Aucun score
+                enregistré. Cliquez sur
+              </ng-container>
+              <ng-container *ngIf="!recording"><strong>Commencer l'enregistrement</strong> pour débuter la mesure du
+                son.
+              </ng-container>
+              <ng-container *ngIf="recording && !remainingSeconds"><strong>Terminer l'enregistrement</strong> pour
+                afficher les valeurs enregistrées.
+              </ng-container>
+            </ng-container>
           </div>
-      </ng-container>
-    </mat-expansion-panel>
-  </mat-accordion>
-</div>
+        </div>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

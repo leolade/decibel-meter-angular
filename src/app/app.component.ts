@@ -169,15 +169,15 @@ export class AppComponent {
   }
 
   openSettings(): void {
-    this.openDrawer('OPTIONS', 'start').subscribe()
+    this.openDrawer('OPTIONS', 'start', true).subscribe()
   }
 
   openApplauseMeter(): void {
-    this.openDrawer('APPLAUSE_METER', 'end').subscribe()
+    this.openDrawer('APPLAUSE_METER', 'end', true).subscribe()
   }
 
   openLeaderboard(): void {
-    this.openDrawer('LEADERBOARD', 'end').subscribe()
+    this.openDrawer('LEADERBOARD', 'end', true).subscribe()
   }
 
   /**
@@ -227,13 +227,13 @@ export class AppComponent {
     return !!this.options?.autoEnd && !!this.options?.autoEndCountdown;
   }
 
-  private openDrawer(drawerState: 'OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', drawerPosition: 'start' | 'end'): Observable<boolean> {
+  private openDrawer(drawerState: 'OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', drawerPosition: 'start' | 'end', toggle: boolean = false): Observable<boolean> {
     return new Observable<boolean>(subscriber => {
       if (!this.drawer) {
         subscriber.next(false);
         subscriber.complete();
       } else {
-        if (drawerState === this.drawerState) {
+        if (drawerState === this.drawerState && toggle) {
           this.drawerState = undefined;
             this.drawer?.close().then(
               () => {

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormControl } from "@angular/forms";
-import { MatDrawer, MatDrawerToggleResult } from '@angular/material/sidenav';
+import { MatDrawer } from '@angular/material/sidenav';
 import { NgxDropzoneChangeEvent } from 'ngx-dropzone';
 import { filter, interval, map, Observable, takeWhile, tap } from "rxjs";
 import { DecibelMeterService } from "./decibel-meter.service";
@@ -37,10 +37,13 @@ export class AppComponent {
   file?: File;
   drawerState?: 'OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER';
   drawerPosition: 'start' | 'end' = 'start';
+
+  private readonly DECIBEL_METER_RANK: string = 'DECIBEL_METER_RANK';
   private currentRecordMeasures: number[] = [];
   private currentRecordMaxMeasure: number = 0;
   private timeoutId?: number = undefined;
   private drawerOpenBeforeRecord?: ['OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', 'start' | 'end'];
+  image?: HTMLImageElement;
 
   constructor(
     private decibelMeterService: DecibelMeterService,
@@ -140,9 +143,9 @@ export class AppComponent {
 
   sortRank(ranking: [string, string][]): [string, string][] {
     return [...ranking].sort(
-      ([rank1TeamName, rank1Scores]: [string, string], [rank2TeamName, rank2Scores]: [string, string]) => {
+      ([rank1TeamName, rank1Scores]: [string, string], rank2: [string, string]) => {
         const rank1Average = parseFloat(rank1Scores);
-        const rank2Average = parseFloat(rank2Scores);
+        const rank2Average = parseFloat(rank2[1]);
         return rank1Average < rank2Average ? 1 : (rank1Average > rank2Average ? -1 : 0);
       }
     )
@@ -160,11 +163,22 @@ export class AppComponent {
   setFile(dropzoneChangeEvent: NgxDropzoneChangeEvent): void {
     if (dropzoneChangeEvent.addedFiles.length > 0) {
       this.file = dropzoneChangeEvent.addedFiles[0];
+      this.image = new Image();
+      if (FileReader) {
+        var fr = new FileReader();
+        fr.onload = () => {
+          if (this.image && typeof fr.result === 'string') {
+            this.image.src = fr.result;
+          }
+        }
+        fr.readAsDataURL(this.file);
+      }
     }
   }
 
   onRemoveFile() {
     this.file = undefined;
+    this.image = undefined;
   }
 
   onOptionChanged(options: IDecibelMeterOptions): void {
@@ -281,14 +295,15 @@ export class AppComponent {
 
   onImageRemovedClick(): void {
     this.file = undefined;
+    this.image = undefined;
   }
 
   private saveRankLocalStorage(): void {
-    localStorage.setItem('DECIBEL_METER_RANK', JSON.stringify(this.ranking));
+    localStorage.setItem(this.DECIBEL_METER_RANK, JSON.stringify(this.ranking));
   }
 
   private loadRankLocalStorage(): [string, string][] {
-    const jsonDecibelRank: string | null = localStorage.getItem('DECIBEL_METER_RANK');
+    const jsonDecibelRank: string | null = localStorage.getItem(this.DECIBEL_METER_RANK);
     if (!jsonDecibelRank) {
       return [];
     }

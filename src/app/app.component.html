@@ -1,50 +1,58 @@
 <mat-drawer-container [hasBackdrop]="false">
   <mat-drawer #drawer [mode]="'side'" [position]="drawerPosition">
     <ng-container [ngSwitch]="drawerState">
-      <app-options *ngSwitchCase="'OPTIONS'"
-                   [recording]="recording"
-                   [defaultOptions]="options"
-                   [hasFile]="!!file"
+      <app-options (clearRankClick)="onClearRankClick()"
+                   (debugScoreTyped)="saveRankDebug($event)"
                    (imageRemovedClick)="onImageRemovedClick()"
-                   (clearRankClick)="onClearRankClick()"
-                   (debugScoreTyped)="saveRankDebug($event)" (optionsChanged)="onOptionChanged($event)">
+                   (optionsChanged)="onOptionChanged($event)"
+                   *ngSwitchCase="'OPTIONS'"
+                   [defaultOptions]="options"
+                   [hasFile]="!!file" [recording]="recording">
       </app-options>
-      <app-applause-meter *ngSwitchCase="'APPLAUSE_METER'" [recording]="recording" [decibelMeasure]="decibelMeasure" [options]="options" [remainingSeconds]="remainingSeconds">
+      <app-applause-meter *ngSwitchCase="'APPLAUSE_METER'" [decibelMeasure]="decibelMeasure" [options]="options"
+                          [recording]="recording" [remainingSeconds]="remainingSeconds">
       </app-applause-meter>
-      <app-leaderboard *ngSwitchCase="'LEADERBOARD'" [options]="options" [sortedRanking]="sortedRanking" (deleteRank)="deleteRank($event)">
+      <app-leaderboard (deleteRank)="deleteRank($event)" *ngSwitchCase="'LEADERBOARD'" [options]="options"
+                       [sortedRanking]="sortedRanking">
       </app-leaderboard>
     </ng-container>
   </mat-drawer>
   <mat-drawer-content>
     <div (change)="setFile($event)" [disableClick]="true"
          [ngClass]="{'has-image': !!file}"
-         accept="image/jpeg,image/jpg,image/png" class="app-container fxFlexbox fxLayoutColumn fxLayoutAlignCenterCenter" ngx-dropzone>
-      <ngx-dropzone-image-preview *ngIf="file" [file]="file">
+         accept="image/jpeg,image/jpg,image/png"
+         class="app-container fxFlexbox fxLayoutColumn fxLayoutAlignCenterCenter" ngx-dropzone>
+      <ngx-dropzone-image-preview *ngIf="file" [file]="file"
+                                  [ngClass]="{
+                                  'higher': image ? (image.naturalHeight > image.naturalWidth) : false,
+                                  'wider': image ? (image.naturalHeight < image.naturalWidth) : false,
+                                  'equal': image ? (image.naturalHeight === image.naturalWidth) : false}">
       </ngx-dropzone-image-preview>
       <div class="app-header fxFlexbox fxLayoutRow fxLayoutAlignSpaceBetweenCenter">
         <div>
-          <button mat-icon-button (click)="openSettings()">
+          <button (click)="openSettings()" mat-icon-button>
             <mat-icon>settings</mat-icon>
           </button>
         </div>
-        <div class="title-box fxFlexbox fxLayoutColumn">
+        <div *ngIf="!file" class="title-box fxFlexbox fxLayoutColumn">
           <h1>Applaudimètre</h1>
           <h2>Afterwork Sopra Steria 23 Juin 2022</h2>
         </div>
         <div class="fxFlexbox fxLayoutRow fxLayoutGap10">
-          <button mat-icon-button (click)="openApplauseMeter()">
+          <button (click)="openApplauseMeter()" mat-icon-button>
             <mat-icon>mic_external_on</mat-icon>
           </button>
-          <button mat-icon-button (click)="openLeaderboard()">
+          <button (click)="openLeaderboard()" mat-icon-button>
             <mat-icon>leaderboard</mat-icon>
           </button>
         </div>
       </div>
 
       <div class="main-container fxFlexbox fxLayoutRow fxLayoutAlignCenterEnd">
-          <div class="applause-container">
-            <app-countdown [maxCountdownValue]="options?.autoEndCountdown" [currentCountdownValue]="remainingSeconds"></app-countdown>
-            <button (click)="onStartRecording()" *ngIf="!recording" color="primary" mat-raised-button>Commencer
+        <div class="applause-container">
+          <app-countdown [currentCountdownValue]="remainingSeconds"
+                         [maxCountdownValue]="options?.autoEndCountdown"></app-countdown>
+          <button (click)="onStartRecording()" *ngIf="!recording" color="primary" mat-raised-button>Commencer
             l'enregistrement
           </button>
           <button (click)="onEndRecording()" *ngIf="recording" color="primary" mat-raised-button>Terminer
@@ -62,7 +70,7 @@
                 </mat-form-field>
 
                 <div>
-                  <button (click)="saveRank(maxMeasureSaved, averageMeasureSaved)" mat-stroked-button >Valider</button>
+                  <button (click)="saveRank(maxMeasureSaved, averageMeasureSaved)" mat-stroked-button>Valider</button>
                 </div>
               </div>
             </ng-container>

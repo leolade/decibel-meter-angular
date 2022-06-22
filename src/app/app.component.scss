@@ -15,6 +15,7 @@
       hsl(28deg 89% 49%) 79%,
       hsl(31deg 100% 47%) 100%
   );
+
   .mat-drawer-container {
     background: none;
   }
@@ -36,10 +37,12 @@
       h1, h2 {
         text-align: center;
       }
+
       h1 {
         font-weight: 500;
         margin: 0;
       }
+
       h2 {
         font-weight: 300;
         margin-bottom: 0;
@@ -56,9 +59,11 @@
         justify-content: center;
         align-items: center;
         width: 375px;
-        &>* {
+
+        & > * {
           margin-bottom: 20px;
         }
+
         &:last-child {
           margin-bottom: 0;
         }
@@ -80,7 +85,7 @@
         padding: 15px;
         border-radius: 15px;
         z-index: 1;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 
         h1, h2 {
           color: black;
@@ -93,13 +98,33 @@
   ::ng-deep {
 
     ngx-dropzone-image-preview {
-      height: calc(100% - 45px)!important;
-      width: calc(100% - 45px)!important;
-      position: absolute!important;
+      height: calc(100% - 45px) !important;
+      width: calc(100% - 45px) !important;
+      position: absolute !important;
+
+      &.higher {
+        img {
+          height: 100%;
+          width: auto;
+        }
+      }
+
+      &.wider {
+        img {
+          height: auto;
+          width: 100%;
+        }
+      }
+
+      &.equal {
+        img {
+          height: 100%;
+          width: 100%;
+        }
+      }
+
       img {
-        height: 100%;
-        width: auto;
-        opacity: 0.9!important;
+        opacity: 0.9 !important;
       }
     }
 
@@ -112,6 +137,7 @@
         line-height: 16px;
         display: flex;
       }
+
       mat-icon {
         font-size: 12px;
         height: 12px;

@@ -24,9 +24,8 @@
          class="app-container fxFlexbox fxLayoutColumn fxLayoutAlignCenterCenter" ngx-dropzone>
       <ngx-dropzone-image-preview *ngIf="file" [file]="file"
                                   [ngClass]="{
-                                  'higher': image ? (image.naturalHeight > image.naturalWidth) : false,
-                                  'wider': image ? (image.naturalHeight < image.naturalWidth) : false,
-                                  'equal': image ? (image.naturalHeight === image.naturalWidth) : false}">
+                                  'higher': imageHigher,
+                                  'wider': !imageHigher}">
       </ngx-dropzone-image-preview>
       <div class="app-header fxFlexbox fxLayoutRow fxLayoutAlignSpaceBetweenCenter">
         <div>

@@ -176,6 +176,12 @@ export class AppComponent {
     }
   }
 
+  get imageHigher(): boolean {
+    return this.image
+      ? (this.image.naturalWidth/this.image.naturalHeight) <= (16/9)
+      : false
+  }
+
   onRemoveFile() {
     this.file = undefined;
     this.image = undefined;

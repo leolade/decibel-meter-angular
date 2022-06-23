@@ -45,28 +45,9 @@ export class AppComponent implements OnInit {
   private timeoutId?: number = undefined;
   private drawerOpenBeforeRecord?: ['OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', 'start' | 'end'];
   image?: HTMLImageElement;
-  teamNameOptions: string[] = [
-    "ALS",
-    "CCH",
-    "DP",
-    "Edition (Intro)",
-    "Edition GF",
-    "Edition GL",
-    "Ingénierie de développement",
-    "Management",
-    "PO",
-    "PS CTECH",
-    "PS GL",
-    "PS GF",
-    "PS MIG",
-    "PS SCO",
-    "QNR",
-    "RC",
-    "SM GF",
-    "SM TT",
-  ];
+  teamNameOptions: string[] = [];
   teamNameFilteredOptions?: Observable<string[]>;
-  subtitle: string = `Afterwork Sopra Steria 23 Juin 2022`;
+  subtitle: string = ``;
 
   constructor(
     private decibelMeterService: DecibelMeterService,

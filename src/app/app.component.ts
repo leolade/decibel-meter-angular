@@ -5,6 +5,7 @@ import {NgxDropzoneChangeEvent} from 'ngx-dropzone';
 import {filter, interval, map, Observable, startWith, takeWhile, tap} from "rxjs";
 import {DecibelMeterService} from "./decibel-meter.service";
 import {IDecibelMeterOptions} from './options/options.component';
+import {environment} from "../environments/environment";
 
 @Component({
   selector: 'app-root',
@@ -45,9 +46,9 @@ export class AppComponent implements OnInit {
   private timeoutId?: number = undefined;
   private drawerOpenBeforeRecord?: ['OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', 'start' | 'end'];
   image?: HTMLImageElement;
-  teamNameOptions: string[] = [];
+  teamNameOptions: string[] = environment.teamNamesAutocomplete;
   teamNameFilteredOptions?: Observable<string[]>;
-  subtitle: string = ``;
+  subtitle: string = environment.subtitle;
 
   constructor(
     private decibelMeterService: DecibelMeterService,

@@ -1,3 +1,6 @@
 export const environment = {
-  production: true
+  production: true,
+  subtitle: ``,
+  teamNamesAutocomplete: [],
+  favicon: `favicon.ico`
 };

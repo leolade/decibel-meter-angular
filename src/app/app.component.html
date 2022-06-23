@@ -67,7 +67,7 @@
                   <mat-label>Nom de l'équipe</mat-label>
                   <input [formControl]="teamNameFC" matInput type="text"
                          [matAutocomplete]="auto"/>
-                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" panelWidth="auto">
                   <mat-option *ngFor="let option of teamNameFilteredOptions | async" [value]="option">
                     {{option}}
                   </mat-option>

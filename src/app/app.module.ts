@@ -20,6 +20,7 @@ import { OptionsComponent } from './options/options.component';
 import { ApplauseMeterComponent } from './applause-meter/applause-meter.component';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
 import { CountdownComponent } from './countdown/countdown.component';
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 @NgModule({
   declarations: [
@@ -29,23 +30,24 @@ import { CountdownComponent } from './countdown/countdown.component';
     LeaderboardComponent,
     CountdownComponent
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatButtonModule,
-    MatSliderModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatExpansionModule,
-    MatCheckboxModule,
-    MatListModule,
-    MatSlideToggleModule,
-    MatIconModule,
-    MatInputModule,
-    NgxDropzoneModule,
-    MatSidenavModule,
-    MatProgressSpinnerModule
-  ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatSliderModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatExpansionModule,
+        MatCheckboxModule,
+        MatListModule,
+        MatSlideToggleModule,
+        MatIconModule,
+        MatInputModule,
+        NgxDropzoneModule,
+        MatSidenavModule,
+        MatProgressSpinnerModule,
+        MatAutocompleteModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

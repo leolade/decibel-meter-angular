@@ -1,17 +1,19 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
-import { FormControl } from "@angular/forms";
-import { MatDrawer } from '@angular/material/sidenav';
-import { NgxDropzoneChangeEvent } from 'ngx-dropzone';
-import { filter, interval, map, Observable, takeWhile, tap } from "rxjs";
-import { DecibelMeterService } from "./decibel-meter.service";
-import { IDecibelMeterOptions } from './options/options.component';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from "@angular/forms";
+import {MatDrawer} from '@angular/material/sidenav';
+import {NgxDropzoneChangeEvent} from 'ngx-dropzone';
+import {filter, interval, map, Observable, startWith, takeWhile, tap} from "rxjs";
+import {DecibelMeterService} from "./decibel-meter.service";
+import {IDecibelMeterOptions} from './options/options.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private readonly DECIBEL_METER_RANK: string = 'DECIBEL_METER_RANK';
+
   @ViewChild('drawer', {read: MatDrawer})
   drawer?: MatDrawer;
 
@@ -38,12 +40,33 @@ export class AppComponent {
   drawerState?: 'OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER';
   drawerPosition: 'start' | 'end' = 'start';
 
-  private readonly DECIBEL_METER_RANK: string = 'DECIBEL_METER_RANK';
   private currentRecordMeasures: number[] = [];
   private currentRecordMaxMeasure: number = 0;
   private timeoutId?: number = undefined;
   private drawerOpenBeforeRecord?: ['OPTIONS' | 'LEADERBOARD' | 'APPLAUSE_METER', 'start' | 'end'];
   image?: HTMLImageElement;
+  teamNameOptions: string[] = [
+    "ALS",
+    "CCH",
+    "DP",
+    "Edition (Intro)",
+    "Edition GF",
+    "Edition GL",
+    "Ingénierie de développement",
+    "Management",
+    "PO",
+    "PS CTECH",
+    "PS GL",
+    "PS GF",
+    "PS MIG",
+    "PS SCO",
+    "QNR",
+    "RC",
+    "SM GF",
+    "SM TT",
+  ];
+  teamNameFilteredOptions?: Observable<string[]>;
+  subtitle: string = `Afterwork Sopra Steria 23 Juin 2022`;
 
   constructor(
     private decibelMeterService: DecibelMeterService,
@@ -71,6 +94,13 @@ export class AppComponent {
           }
         }
       );
+  }
+
+  ngOnInit(): void {
+    this.teamNameFilteredOptions = this.teamNameFC.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || '')),
+    );
   }
 
   /**
@@ -320,6 +350,12 @@ export class AppComponent {
     this.ranking = [];
     this.sortedRanking = this.sortRank(this.ranking);
     this.saveRankLocalStorage();
+  }
+
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.teamNameOptions.filter(option => option.toLowerCase().includes(filterValue));
   }
 }
 

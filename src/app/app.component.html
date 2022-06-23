@@ -35,7 +35,7 @@
         </div>
         <div *ngIf="!file" class="title-box fxFlexbox fxLayoutColumn">
           <h1>Applaudimètre</h1>
-          <h2>Afterwork Sopra Steria 23 Juin 2022</h2>
+          <h2>{{subtitle}}</h2>
         </div>
         <div class="fxFlexbox fxLayoutRow fxLayoutGap10">
           <button (click)="openApplauseMeter()" mat-icon-button>
@@ -63,9 +63,16 @@
               <div>Meilleur score : <strong>{{maxMeasureSaved }}db</strong></div>
               <div>Score moyen : <strong>{{ averageMeasureSaved }}db</strong></div>
               <div class="team-name-form-field fxFlexbox fxLayoutRow fxLayoutGap10 fxLayoutAlignCenterCenter">
-                <mat-form-field>
+                <mat-form-field *ngIf="teamNameFilteredOptions">
                   <mat-label>Nom de l'équipe</mat-label>
-                  <input [formControl]="teamNameFC" matInput type="text"/>
+                  <input [formControl]="teamNameFC" matInput type="text"
+                         [matAutocomplete]="auto"/>
+                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                  <mat-option *ngFor="let option of teamNameFilteredOptions | async" [value]="option">
+                    {{option}}
+                  </mat-option>
+                </mat-autocomplete>
+
                 </mat-form-field>
 
                 <div>

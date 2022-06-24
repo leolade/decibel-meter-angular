@@ -148,7 +148,11 @@ export class AppComponent implements OnInit {
   }
 
   deleteRank(index: number): void {
-    this.ranking.splice(index, 1);
+    const rankToDelete: [string, string] = this.sortedRanking[index];
+    const unsortedIndexOfRankToDelete = this.ranking.findIndex(([rankTeamName, rankScore]) => {
+      return rankTeamName === rankToDelete[0] && rankScore === rankToDelete[1];
+    })
+    this.ranking.splice(unsortedIndexOfRankToDelete, 1);
     this.sortedRanking = this.sortRank(this.ranking);
     this.saveRankLocalStorage();
   }

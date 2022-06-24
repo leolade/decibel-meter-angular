@@ -36,13 +36,13 @@ export class OptionsComponent implements OnInit {
         showRank: this.showRankFC,
       }
     );
+  }
+
+  ngOnInit(): void {
 
     if (this.defaultOptions) {
       this.optionsForm.setValue(this.defaultOptions);
     }
-  }
-
-  ngOnInit(): void {
 
     this.optionsForm.valueChanges
       .pipe(startWith(() => {

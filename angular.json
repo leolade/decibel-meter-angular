@@ -83,13 +83,14 @@
                   "maximumError": "4kb"
                 }
               ],
+              "index": {
+                "input": "src/index-sopra.html",
+                "output": "index.html"
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.sopra.prod.ts"
-                },{
-                  "replace": "src/index.html",
-                  "with": "src/index-sopra.html"
                 }
               ],
               "outputHashing": "all"
